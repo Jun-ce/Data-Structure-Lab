@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Tree">
+      <UniqueIdentifier>{33080917-6e79-41d4-aa51-2816d7488834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataStructureLabMain">
+      <UniqueIdentifier>{e988894d-c050-4415-ad9d-b13fde5a02d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -21,13 +27,28 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Tree\BinarySearchTree.h">
+      <Filter>Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Tree\BTree.h">
+      <Filter>Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Tree\RedBlackTree.h">
+      <Filter>Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\DataStructureLab.h">
+      <Filter>DataStructureLabMain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DataStructureLab.VS.win32.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\Source\Tree\RedBlackTree.cpp">
+      <Filter>Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\DataStructureLab.cpp">
+      <Filter>DataStructureLabMain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
