@@ -89,7 +89,7 @@ public:
          / \           / \
         b   c         a   b
     */
-    static void LeftRotate(RedBlackTree T, RBTNode* x) {  // 向左转
+    static void LeftRotate(RedBlackTree & T, RBTNode* x) {  // 向左转
         if (x->right == T.nil) {
             printf("x with key=%d 's right is nil. left rotation failed.\n", x->key);
             return;
@@ -119,7 +119,7 @@ public:
         x->p = y;
     }
 
-    static void RightRotate(RedBlackTree T, RBTNode* y) {  // 向右转
+    static void RightRotate(RedBlackTree & T, RBTNode* y) {  // 向右转
         if (y->left == T.nil) {
             printf("y with key=%d 's left is nil. right rotation failed.\n", y->key);
             return;
@@ -147,7 +147,7 @@ public:
     }
 
     // 四.插入
-    static void RBInsert(RedBlackTree T, RBTNode* z) {
+    static void RBInsert(RedBlackTree & T, RBTNode* z) {
         // 时间: O(h) = O(lgn)，因为本身和 BSTIsert 复杂度一样，Fix 也是 O(lgn)
         // 前半部分和 BST insert 几乎一样，最后用 RBInsertFix() 来维护颜色
         // 插入的值默认颜色为红
@@ -181,7 +181,7 @@ public:
         T.RBInsertFix(T, z);  // 维护颜色
     }
 
-    static void RBInsertFix(RedBlackTree T, RBTNode* z) {  // 在 z 被二叉搜索插入 T 后，维护颜色
+    static void RBInsertFix(RedBlackTree & T, RBTNode* z) {  // 在 z 被二叉搜索插入 T 后，维护颜色
         // para T: 更改进行过 BSTInsert z 的RBT
         // para z: 被插入的结点，初始颜色 RED
         // 时间: O(h) = O(lgn)，因为每次循环必向上两层

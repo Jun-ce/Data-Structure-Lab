@@ -152,7 +152,7 @@ public:
 
 
     // 5.插入
-    static void treeInsert(BinarySearchTree T, BSTNode* z) {
+    static void treeInsert(BinarySearchTree & T, BSTNode* z) {
     // para T: 要插入的树
     // para z: 插入的新元素的结点，z.key = value, z.left = nil, z.right = nil
     // 时间 O(h)，每次迭代下降一层，最多下降 h 层
@@ -184,7 +184,7 @@ public:
     // 6.删除
 
     // (移植，用于删除的子程序)
-    static void transplant(BinarySearchTree T, BSTNode* u, BSTNode* v) {
+    static void transplant(BinarySearchTree & T, BSTNode* u, BSTNode* v) {
         // para T: 要进行移植操作的树
         // para u: 要移植到的目标位置结点
         // para v: 要移植的子树的根结点，允许是 nil (即一颗空树)
@@ -211,7 +211,7 @@ public:
     }
 
     // (删除)
-    static void treeDelete(BinarySearchTree T, BSTNode* z) {
+    static void treeDelete(BinarySearchTree & T, BSTNode* z) {
         // para T: 要删结点的树
         // para z: 要删除的结点
         // 时间 O(h)，除定义 z 的后继可能花费 O(h)，其余操作均为 O(1)
