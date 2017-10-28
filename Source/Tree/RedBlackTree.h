@@ -45,8 +45,13 @@ public:
     RBTNode* root;
     RBTNode* nil = new RBTNode;  // sentinel node，黑色，root的p，所有的叶结点
 
-    // 调试函数
+    // BST 继承函数，算法一致，不在此实现
     void inorderTreeWalk(RBTNode* x);
+    RBTNode* treeMinimum(RBTNode* x);
+    RBTNode* treeMaximum(RBTNode* x);
+    RBTNode* treeSuccessor(RBTNode* x);
+    RBTNode* treePredecessor(RBTNode* x);
+
 
     RedBlackTree(RBTNode* r) {  // 构造函数，初始化以符合 RBT 的定义
         // para r: 作为根结点的结点指针
@@ -240,7 +245,7 @@ public:
                     // case 3: y 为黑，z 是左子结点 
                     z->p->color = BLACK;  // 更改 z 原父为黑
                     z->p->p->color = RED;  // 更改 z 原爷为红
-                    T.RightRotate(T, z->p->p);  // 右转之后所有颜色维护完毕
+                    T.RightRotate(T, z->p->p);  // 右转之后所有颜色维护完毕, 下一个循环不再进行
                 }
             }
             else if (z->p == z->p->p->right) {  // 和同级的 if 完全左右对称，此用 else if 以排除 z->p == T.root 的情况
@@ -270,4 +275,150 @@ public:
     }
 
     // 五.删除
+    static RBTNode* RBDelete(RedBlackTree & T, RBTNode* z) {
+        // 删除的本质实际上是将 z 的后继值赋给 z，然后删除 z 的后继
+        // return y: 真正被删除的结点
+        // 时间 O(h) = O(logn)
+
+        RBTNode* y;  // 定义真正被删除的结点 y
+        if (z->left == T.nil || z->right == T.nil) {
+            y = z;  // 如果 z 只有单子，不用删后继，删 z 自己即可
+        }
+        else {
+            y = T.treeSuccessor(z);
+        }
+        RBTNode* x;  // 定义即将代替 y 位置的子结点 x，优先左，其次右，可以是 nil
+        if (y->left != T.nil) {
+            x = y->left;
+        }
+        else {
+            x = y->right;
+        }
+        x->p = y->p;  // 将代替 y 的子结点 x 连至 y->p
+        // 下面分情况将 y->p 连至 x
+        if (y->p == T.nil) {
+            T.root = x;
+        }
+        else if (y == y->p->left) {
+            y->p->left = x;
+        }
+        else {
+            y->p->right = x;
+        }
+        // 如果删的不是 z 本身，那把删前的后继 y 的内容赋给 z
+        if (y != z) {
+            z->key = y->key;
+            z->satelliteData = y->satelliteData;
+        }
+        // 当删除的 y 是黑色时，有可能造成矛盾，需要修复颜色
+        // 删除红色不会违反任何一条性质，故不管
+        if (y->color == BLACK) {
+            T.RBDeleteFixup(T, x);
+        }
+        return y;
+    }
+
+    static void RBDeleteFixup(RedBlackTree T, RBTNode* x){
+        // para x: 被删除的节点 y 的原子结点，且 x 已经替换 y 的原位置
+        // 当删除了一个黑色结点 x->p 时（在这里，被删除的是输入结点的父结点）
+        // 有可能违背的性质：
+        // 1. OK: 颜色仍然有定义，没有违反
+        // 2. (y 根，x 红) 如果 y 是根结点，且 x 是红色的，那会违反根是黑色的定义
+        // 3. OK: 所有叶结点仍然为 nil，为黑，不会违反
+        // 4. (y->p 红，x 红) y->p 和 x 已经链接，如果这两个都是红色，将会违反红色节点的子全黑的定义
+        // 5. y 一定是黑色，其所在路径上的黑色结点数必定减一，违反所有路径黑高一致
+        //  如果 x 本身为红，直接将其修改为黑色即可维护完成所有性质
+        //  下面考虑当 x 为黑色时的维护
+        //  思路：给 x 的颜色一个"额外的黑色"，
+        //       如果 x 本来为黑，这个颜色变成双黑，否则变成红黑
+        //       用改变 x 所指向的 node 实现
+        //       从x 到根的方向维护这个结点指针，这个途中把红黑的点表示成黑色，进行重染色和旋转以修复性质
+        //       每次迭代的终止时 x 向上一层或者直接跳至根节点
+        //       当最终这个额外的黑色被维护到根结点或 Case 4 的出口跳到根节点时，
+        //       所有路径的真实黑高(不考虑额外黑色的黑高)相等，直接删除额外的黑色以维护性质 5
+        // Fixup 的时间是 O(h) = O(logn)
+        
+        // Case ALL 大前提: 当 x 为黑色时的维护
+        while (x != T.root && x->color == BLACK) {
+            RBTNode* w; // w 是 x 的兄弟结点 (sibling)
+            if (x == x->p->left) {  // w 兄弟结点在右侧
+                w = x->p->right; 
+            // Case 1: 当兄弟结点是红色时，其双子和父结点 x->p 一定全黑
+                if (w->color == RED) {  
+                    w->color = BLACK;  
+                    x->p->color = RED;  // 交换父结点和兄弟结点的颜色
+                    T.LeftRotate(T, x->p);  // 从父结点左转，将兄弟结点转上去
+                    w = x->p->right;  // 转完之后的 x 的新兄弟是原兄弟的子结点，必定是黑
+                }  // ==> 进入 Case 2,3,4 
+            //  Case 2,3,4 的大前提：兄弟节点是黑色
+                //  将 x 和 w 那一层的黑上移一层(双黑变黑，红黑变红)，x 和 w 的父结点增加一个黑
+                //  因为 x 一定是双黑，上移黑色不变，所以根据 w 的子结点颜色来进行分类
+                
+                // Case 2: 当兄弟节点自身为黑，且其双子全黑 
+                if (w->left->color == BLACK &&  
+                    w->right->color == BLACK) {
+                    w->color = RED;  // w 变成红色没有任何问题
+                    x = x->p;  // x 这个额外的黑色的指针上移一层
+                    // 此处本循环结束，如果x->p是红色，下一步直接修改完成，如果是黑色，继续修改
+                }
+                else { 
+                // Case 3,4 大前提: w 有红色子结点时
+                    // Case 3: 兄弟结点为黑，其左子红，右子黑
+                    if (w->right->color == BLACK) {  
+                        w->color = RED;
+                        w->left->color = BLACK;  // 交换 w 和左子结点颜色
+                        T.RightRotate(T, w);  // 把 w 向右转，将其左子节点转到 w 的原位置
+                        w = x->p->right;  // x 新的兄弟结点为交换过去的黑色，但是兄弟节点右子结点是原兄弟节点，被交换为红色
+                    }  // ==> Case 4
+                    // Case 4: 兄弟节点右子结点为红色时
+                    w->color = x->p->color;
+                    x->p->color = BLACK;  // 交换兄弟节点(黑)和父结点(颜色未知)的颜色
+                    w->right->color = BLACK;  // 将兄弟节点右子结点的红色改为黑色
+                    T.LeftRotate(T, x->p);  // 在x->p左转，把换过颜色的 w 转上来
+                    // 此时原 x->p 位置是原 w, 其双子是被换为黑色的原 x->p 和原 w->right，均为黑色
+                    // 原 w 被换为了原 x->p 的颜色，这个颜色在双子为黑时一定符合性质
+                    // 而原 x 下移一层，多了一个被改为黑色的父结点原 x ->p
+                    // 原 w 左子结点连在了被改为黑色的原 x->p 上，层级不变，其原父为原 w 也为黑，黑高不变
+                    // 至此整棵树修缮完毕
+                    x = T.root; // 直接进入循环出口，并且万一原 x->p 的颜色为红色且在根上，循环外可以维护颜色
+                }
+            }
+
+            // 以下对称，当 x 的兄弟结点在另一个方向时
+            else {
+                w = x->p->left;
+                // Case 1
+                if (w->color == RED) {
+                    x->p->color = RED;
+                    w->color = BLACK;
+                    T.RightRotate(T, x->p);
+                    w = x->p->left;
+                }
+                // Case 2
+                if (w->left->color == BLACK &&
+                    w->right->color == BLACK) {
+                    w->color = RED;
+                    x = x->p;
+                }
+                else {
+                    // Case 3
+                    if (w->left->color == BLACK) {
+                        w->color = RED;
+                        w->right->color = BLACK;
+                        T.LeftRotate(T, w);
+                        w = x->p->left;
+                    }
+                    // Case 4
+                    w->color = x->p->color;
+                    x->p->color = BLACK;
+                    w->left->color = BLACK;
+                    T.RightRotate(T, x->p);
+                    x = T.root;
+                }
+            }
+        }
+        // 最终，将原本为红色的 x ，或者可能为红色的根染成黑色，维护结束
+        x->color = BLACK;
+    }
+
 };
